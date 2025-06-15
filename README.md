@@ -1,4 +1,3 @@
-```markdown
 # Doodle Chat - Backend Service
 
 ## Overview
@@ -24,15 +23,15 @@ cd doodle/backend
 yarn install
 
 # 3. Start the system
-docker-compose up --build
+docker-compose up -d db
 
 # 4. Apply schema migrations inside backend folder
-docker-compose -f docker-compose.yml run app npm run migrate
---passport: postgres
+- docker-compose -f docker-compose.yml run app npm run migrate
+- --passport: postgres
 
 # 5. Access services:
-#   - API: http://localhost:4000
-#   - Database: localhost:5432
+  - API: http://localhost:4000
+  - Database: localhost:5432
 
 ## API Endpoints
 | Endpoint | Method | Description | Parameters |
@@ -61,7 +60,6 @@ curl -H "Authorization: Bearer doodle-token" http://localhost:4000/api/v1/messag
 |-----------|----------------|
 | `messages` table | Stores chat messages with timestamps |
 | Authentication | Bearer token verification for all endpoints |
-| Pagination | `after` and `limit` parameters for message history |
 | Health Check | Database and API status monitoring |
 
 ## Environment Configuration
@@ -80,7 +78,7 @@ curl -H "Authorization: Bearer doodle-token" http://localhost:4000/api/v1/messag
 docker-compose -f docker-compose.yml up --build -d
 
 # Stop services
-docker-compose down
+docker-compose down -v
 
 # Regenerate token
 yarn generate-token
@@ -123,4 +121,3 @@ INSERT INTO messages (message, author) VALUES
 3. **Migration issues**:
    - Verify migration file exists in `db/migrations`
    - Check file permissions: `chmod +x db/init.sh`
-```
