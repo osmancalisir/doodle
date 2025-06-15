@@ -1,11 +1,8 @@
 // frontend/src/components/chat/MessageInput.tsx
 
-import React, { useState, useRef, useEffect } from "react";
-import { Box, TextField, IconButton, Tooltip } from "@mui/material";
+import React, { useRef, useState, useEffect } from "react";
+import { Box, TextField, IconButton, InputAdornment } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import MoodIcon from "@mui/icons-material/Mood";
-import MicIcon from "@mui/icons-material/Mic";
 
 interface MessageInputProps {
   value: string;
@@ -18,12 +15,11 @@ interface MessageInputProps {
 export default function MessageInput({ value, onChange, onSend, disabled }: MessageInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
     }
   }, [value]);
 
@@ -44,28 +40,15 @@ export default function MessageInput({ value, onChange, onSend, disabled }: Mess
 
   return (
     <Box
-      className="border-t border-gray-200 p-3"
+      className="border-t border-gray-200 p-3 bg-white"
       sx={{
-        boxShadow: "0px -2px 10px rgba(0, 0, 0, 0.03)",
-        backgroundColor: "background.paper",
+        boxShadow: "0px -1px 4px rgba(0, 0, 0, 0.05)",
       }}
     >
       <Box className="flex items-end">
-        <Tooltip title="Attach file">
-          <IconButton className="mr-1 self-center" disabled={disabled} sx={{ color: "text.secondary" }}>
-            <AttachFileIcon />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title="Emoji">
-          <IconButton className="mr-1 self-center" disabled={disabled} sx={{ color: "text.secondary" }}>
-            <MoodIcon />
-          </IconButton>
-        </Tooltip>
-
         <TextField
           multiline
-          maxRows={6}
+          maxRows={4}
           fullWidth
           variant="outlined"
           placeholder="Type a message..."
@@ -74,29 +57,45 @@ export default function MessageInput({ value, onChange, onSend, disabled }: Mess
           onKeyDown={handleKeyDown}
           onCompositionStart={handleComposition}
           onCompositionEnd={handleComposition}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           inputRef={textareaRef}
           disabled={disabled}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end" sx={{ alignSelf: "flex-end", mb: 0.5 }}>
+                <IconButton
+                  onClick={onSend}
+                  disabled={disabled || !value.trim()}
+                  sx={{
+                    backgroundColor: "primary.main",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                    },
+                    "&:disabled": {
+                      backgroundColor: "#e5e7eb",
+                      color: "#9ca3af",
+                    },
+                  }}
+                >
+                  <SendIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "25px",
-              padding: "8px 16px",
-              backgroundColor: "action.hover",
+              padding: "4px 8px",
+              backgroundColor: "#f3f4f6",
               transition: "all 0.3s",
-              borderWidth: "1px",
-              borderColor: isFocused ? "primary.main" : "divider",
-              "&:hover": {
-                backgroundColor: "action.selected",
-              },
               "&.Mui-focused": {
-                backgroundColor: "background.paper",
+                backgroundColor: "white",
                 boxShadow: "0 0 0 2px rgba(63, 81, 181, 0.2)",
               },
             },
             "& .MuiInputBase-input": {
-              padding: "0",
-              maxHeight: "150px",
+              padding: "8px 0",
+              maxHeight: "100px",
               overflowY: "auto",
               fontSize: "0.95rem",
               "&::-webkit-scrollbar": {
@@ -109,45 +108,6 @@ export default function MessageInput({ value, onChange, onSend, disabled }: Mess
             },
           }}
         />
-
-        {value.trim() ? (
-          <Tooltip title="Send message">
-            <IconButton
-              className="ml-2 self-center"
-              onClick={onSend}
-              disabled={disabled}
-              sx={{
-                backgroundColor: "primary.main",
-                color: "primary.contrastText",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-                "&:disabled": {
-                  backgroundColor: "action.disabledBackground",
-                  color: "action.disabled",
-                },
-              }}
-            >
-              <SendIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Voice message">
-            <IconButton
-              className="ml-2 self-center"
-              disabled={disabled}
-              sx={{
-                backgroundColor: "action.hover",
-                color: "text.secondary",
-                "&:hover": {
-                  backgroundColor: "action.selected",
-                },
-              }}
-            >
-              <MicIcon />
-            </IconButton>
-          </Tooltip>
-        )}
       </Box>
     </Box>
   );

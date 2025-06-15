@@ -21,19 +21,17 @@ export default function MessageList({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
     <Box
-      className="flex flex-col-reverse"
+      className="flex flex-col"
       sx={{
         height: "100%",
         overflowY: "auto",
         padding: "16px 12px",
-        background: "linear-gradient(to bottom, #f9fafb, #f0f4f8)",
+        background: "#f9fafb",
         "&::-webkit-scrollbar": {
           width: "8px",
         },
@@ -50,12 +48,6 @@ export default function MessageList({
         },
       }}
     >
-      <div ref={messagesEndRef} />
-
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
-      ))}
-
       {hasMore && (
         <Box className="flex justify-center my-3">
           <Button
@@ -124,6 +116,12 @@ export default function MessageList({
           </Typography>
         </Box>
       )}
+
+      {messages.map((message) => (
+        <MessageItem key={message.id} message={message} />
+      ))}
+
+      <div ref={messagesEndRef} />
     </Box>
   );
 }

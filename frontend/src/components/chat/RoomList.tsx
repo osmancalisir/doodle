@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client";
 import { CREATE_ROOM, GET_ROOMS } from "@/lib/graphql/typeDefs";
 import { DELETE_ROOM } from "@/lib/graphql/mutations";
-import { useChat } from "@/context/ChatContext";
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -17,25 +16,23 @@ import {
   ListItemAvatar,
   Avatar,
   IconButton,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
   Skeleton,
+  TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import GroupIcon from "@mui/icons-material/Group";
 import DeleteRoomDialog from "./DeleteRoomDialog";
+import { useChat } from "@/context/ChatContext";
 
 export default function RoomList() {
-  const { currentUser } = useChat();
-  const { data, refetch } = useQuery(GET_ROOMS);
-  const [createRoom] = useMutation(CREATE_ROOM, {
-    onCompleted: () => refetch(),
-  });
+  const { data } = useQuery(GET_ROOMS);
+  const [createRoom] = useMutation(CREATE_ROOM);
   const [deleteRoom] = useMutation(DELETE_ROOM);
   const [newRoomName, setNewRoomName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,6 +40,8 @@ export default function RoomList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { currentUser, setCurrentUser } = useChat();
 
   useEffect(() => {
     setIsMounted(true);
@@ -112,6 +111,9 @@ export default function RoomList() {
     }
   };
 
+  const filteredRooms =
+    data?.rooms?.filter((room: { name: string }) => room.name.toLowerCase().includes(searchQuery.toLowerCase())) || [];
+
   if (!isMounted) {
     return (
       <div className="p-4">
@@ -126,30 +128,69 @@ export default function RoomList() {
   }
 
   return (
-    <Box className="h-full flex flex-col">
-      <Box className="p-4 border-b">
-        <Button fullWidth variant="contained" startIcon={<AddIcon />} onClick={() => setIsDialogOpen(true)}>
-          New Chat Room
+    <Box className="h-full flex flex-col bg-gray-50">
+      <Box className="p-4 border-b bg-white">
+        <Typography variant="h6" className="font-bold mb-4">
+          Chat Rooms
+        </Typography>
+
+        <Box className="flex mb-4 bg-gray-100 rounded-lg px-3 py-2 gap-3">
+          <input
+            type="text"
+            placeholder="Search rooms..."
+            className="bg-transparent w-full focus:outline-none h-[36px] py-1.5"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Avatar
+            sx={{
+              width: 36,
+              height: 36,
+              bgcolor: "primary.main",
+              fontSize: "0.95rem",
+              flexShrink: 0,
+            }}
+            onClick={() => {
+              const newName = prompt("Enter your name", currentUser);
+              if (newName) setCurrentUser(newName);
+            }}
+          >
+            {currentUser.charAt(0)}
+          </Avatar>
+        </Box>
+
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setIsDialogOpen(true)}
+          sx={{ mb: 2 }}
+        >
+          New Room
         </Button>
       </Box>
 
       <Box className="flex-1 overflow-y-auto">
-        <List>
-          {data?.rooms?.map((room: any) => (
+        <List sx={{ py: 0 }}>
+          {filteredRooms.map((room: any) => (
             <ListItem
               key={room.id}
               component={Link}
               href={`/chat/${room.id}`}
               className="hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+              sx={{ py: 1.5 }}
             >
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: "primary.light" }}>
+                <Avatar sx={{ bgcolor: "primary.light", width: 36, height: 36 }}>
                   <GroupIcon />
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={room.name}
-                secondary={`Created: ${new Date(room.createdAt).toLocaleDateString()}`}
+                secondary={`ID: ${room.id.slice(0, 8)}...`}
+                primaryTypographyProps={{ fontWeight: "medium" }}
+                secondaryTypographyProps={{ variant: "caption" }}
+                sx={{ my: 0 }}
               />
               <IconButton
                 edge="end"
@@ -159,25 +200,13 @@ export default function RoomList() {
                   e.stopPropagation();
                   handleDeleteClick(room);
                 }}
-                sx={{ color: "error.main" }}
+                sx={{ color: "text.secondary" }}
               >
-                <DeleteIcon />
+                <DeleteIcon fontSize="small" />
               </IconButton>
             </ListItem>
           ))}
         </List>
-      </Box>
-
-      <Box className="p-4 border-t flex items-center bg-gray-50">
-        <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>{currentUser.charAt(0)}</Avatar>
-        <Box>
-          <Typography variant="body2" fontWeight="medium">
-            {currentUser}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Online
-          </Typography>
-        </Box>
       </Box>
 
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>

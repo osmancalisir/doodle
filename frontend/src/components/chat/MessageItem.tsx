@@ -23,21 +23,17 @@ export default function MessageItem({ message }: MessageItemProps) {
       sx={{
         maxWidth: "85%",
         alignSelf: isCurrentUser ? "flex-end" : "flex-start",
-        transition: "transform 0.2s, opacity 0.2s",
-        "&:hover": {
-          transform: "translateY(-2px)",
-        },
       }}
     >
       {!isCurrentUser && (
         <Avatar
           className="mr-2"
           sx={{
-            bgcolor: "primary.light",
-            width: 36,
-            height: 36,
-            alignSelf: "flex-end",
-            mb: 0.5,
+            bgcolor: "#e5e7eb",
+            width: 32,
+            height: 32,
+            alignSelf: "flex-start",
+            mt: 0.5,
           }}
         >
           {message.author.charAt(0)}
@@ -45,27 +41,15 @@ export default function MessageItem({ message }: MessageItemProps) {
       )}
 
       <Box
-        className="rounded-xl p-3"
         sx={{
           borderRadius: "18px",
+          padding: "12px 16px",
+          backgroundColor: isCurrentUser ? "#3f51b5" : "#f3f4f6",
+          color: isCurrentUser ? "white" : "text.primary",
           borderBottomRightRadius: isCurrentUser ? "4px" : "18px",
           borderBottomLeftRadius: isCurrentUser ? "18px" : "4px",
-          backgroundColor: isCurrentUser ? "primary.main" : "background.paper",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
           position: "relative",
-          "&:before": {
-            content: '""',
-            position: "absolute",
-            bottom: 0,
-            [isCurrentUser ? "right" : "left"]: "-8px",
-            width: 0,
-            height: 0,
-            borderStyle: "solid",
-            borderWidth: isCurrentUser ? "0 0 12px 12px" : "12px 0 0 12px",
-            borderColor: isCurrentUser
-              ? `transparent transparent ${isCurrentUser ? "#3f51b5" : "#f5f5f5"} transparent`
-              : `transparent transparent transparent ${isCurrentUser ? "#3f51b5" : "#f5f5f5"}`,
-          },
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
         }}
       >
         {!isCurrentUser && (
@@ -82,9 +66,9 @@ export default function MessageItem({ message }: MessageItemProps) {
         )}
         <Typography
           sx={{
-            color: isCurrentUser ? "primary.contrastText" : "text.primary",
             lineHeight: 1.4,
             wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
           }}
         >
           {message.message}
@@ -95,7 +79,7 @@ export default function MessageItem({ message }: MessageItemProps) {
             display: "block",
             mt: 0.5,
             textAlign: "right",
-            color: isCurrentUser ? "primary.light" : "text.secondary",
+            color: isCurrentUser ? "rgba(255,255,255,0.7)" : "text.secondary",
             fontSize: "0.7rem",
           }}
         >

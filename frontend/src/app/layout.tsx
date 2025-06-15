@@ -2,15 +2,16 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import ThemeProvider from "@/providers/ThemeProvider";
 import ApolloClientProvider from "@/providers/ApolloProvider";
 import { ChatProvider } from "@/context/ChatContext";
-import RoomList from "@/components/chat/RoomList";
-import { Skeleton } from "@mui/material";
 import { usePathname } from "next/navigation";
+import RoomList from "@/components/chat/RoomList";
+import { Box } from "@mui/material";
+import "./globals.css";
 
-export default function ChatLayout({ children }: { children: React.ReactNode }) {
+export default function ChatLayout({ children }: { children: ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
 
@@ -21,19 +22,18 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   if (!isMounted) {
     return (
       <html lang="en">
-        <body>
-          <div className="flex h-screen">
-            <div className="w-64 border-r border-gray-200 bg-white shadow-sm p-4">
-              <div className="space-y-4">
-                <Skeleton variant="rounded" width="100%" height={70} />
-                <Skeleton variant="rounded" width="100%" height={70} />
-                <Skeleton variant="rounded" width="100%" height={70} />
-              </div>
+        <body className="h-screen flex">
+          <div className="w-64 bg-gray-50 p-4 border-r">
+            <div className="space-y-4">
+              <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
             </div>
-            <main className="flex-1 flex flex-col">
-              <Skeleton variant="rectangular" width="100%" height="100%" />
-            </main>
           </div>
+          <main className="flex-1 flex flex-col">
+            <div className="h-16 bg-white border-b"></div>
+            <div className="flex-1 bg-gray-100"></div>
+          </main>
         </body>
       </html>
     );
@@ -45,15 +45,14 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         <ApolloClientProvider>
           <ThemeProvider>
             <ChatProvider>
-              <div className="flex h-screen">
-                {/* Only show sidebar on chat routes */}
-                {pathname.startsWith("/chat") && (
-                  <div className="w-64 border-r border-gray-200 bg-white shadow-sm">
-                    <RoomList />
-                  </div>
-                )}
-                <main className="flex-1 flex flex-col">{children}</main>
-              </div>
+              <Box sx={{ display: "flex" }}>
+                {pathname.startsWith("/chat") && <RoomList />}
+
+                <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - 280px)` } }}>
+                  <Box sx={{ height: "64px" }} />
+                  {children}
+                </Box>
+              </Box>
             </ChatProvider>
           </ThemeProvider>
         </ApolloClientProvider>
