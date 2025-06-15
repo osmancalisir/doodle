@@ -1,0 +1,39 @@
+# backend/docker-compose.yml
+
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_USER=doodle
+      - DB_NAME=doodlebackend
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CHAT_TOKEN=super-secret-doodle-token
+      - NODE_ENV=${NODE_ENV:-development}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: doodle
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: doodlebackend
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doodle -d doodlebackend"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
