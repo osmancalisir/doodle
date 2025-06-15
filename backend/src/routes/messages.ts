@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.get('/', getMessages);
-router.post('/', createMessage);
+router.get('/:roomId([a-f0-9-]+)', getMessages);
+router.post('/:roomId([a-f0-9-]+)', createMessage);
 
 export { router as messagesRouter };

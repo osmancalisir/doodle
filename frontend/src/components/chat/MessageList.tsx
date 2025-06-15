@@ -1,53 +1,34 @@
 // frontend/src/components/chat/MessageList.tsx
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import MessageItem from "./MessageItem";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Message } from "@/lib/types/message";
 
 interface MessageListProps {
   messages: Message[];
-  onLoadMore: () => void;
-  hasMore: boolean;
-  loadingMore: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  loadingMore?: boolean;
 }
 
-export default function MessageList({ messages, onLoadMore, hasMore, loadingMore }: MessageListProps) {
-  const [autoScroll, setAutoScroll] = useState(true);
+export default function MessageList({
+  messages = [],
+  onLoadMore = () => {},
+  hasMore = false,
+  loadingMore = false,
+}: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const prevMessageCount = useRef(messages.length);
-  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (autoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, autoScroll]);
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const element = e.currentTarget;
-    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
-    setAutoScroll(atBottom);
-  };
-
-  useEffect(() => {
-    if (messages.length > prevMessageCount.current) {
-      setAutoScroll(true);
-    }
-    prevMessageCount.current = messages.length;
-  }, [messages.length]);
-
-  useEffect(() => {
-    if (messagesEndRef.current && messages.length > 0) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, []);
+  }, [messages]);
 
   return (
     <Box
       className="flex flex-col-reverse"
-      onScroll={handleScroll}
-      ref={listRef}
       sx={{
         height: "100%",
         overflowY: "auto",

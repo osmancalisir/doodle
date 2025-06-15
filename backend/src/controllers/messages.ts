@@ -20,6 +20,7 @@ export const getMessages = async (
   next: NextFunction
 ) => {
   try {
+    const roomId = req.params.roomId;
     const { after, limit = 50 } = GetMessagesSchema.parse(req.query);
     
     const sql = `
@@ -29,12 +30,13 @@ export const getMessages = async (
         author,
         created_at AS "createdAt"
       FROM messages
-      ${after ? 'WHERE created_at < $1' : ''}
+      WHERE room_id = $1
+      ${after ? 'AND created_at < $2' : ''}
       ORDER BY created_at DESC
-      LIMIT $${after ? 2 : 1}
+      LIMIT $${after ? 3 : 2}
     `;
     
-    const params = after ? [after, limit] : [limit];
+    const params = after ? [roomId, after, limit] : [roomId, limit];
     const result = await query(sql, params);
     
     res.json(result.rows);
@@ -49,13 +51,14 @@ export const createMessage = async (
   next: NextFunction
 ) => {
   try {
+    const roomId = req.params.roomId;
     const { message, author } = MessageSchema.parse(req.body);
     
     const result = await query(
-      `INSERT INTO messages (message, author)
-       VALUES ($1, $2)
+      `INSERT INTO messages (message, author, room_id)
+       VALUES ($1, $2, $3)
        RETURNING id, message, author, created_at AS "createdAt"`,
-      [message, author]
+      [message, author, roomId]
     );
     
     res.status(201).json(result.rows[0]);
