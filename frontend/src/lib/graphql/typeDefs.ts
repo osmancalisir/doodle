@@ -44,6 +44,12 @@ export const CREATE_ROOM = gql`
   }
 `;
 
+export const DELETE_ROOM = gql`
+  mutation DeleteRoom($roomId: ID!) {
+    deleteRoom(roomId: $roomId)
+  }
+`;
+
 export const typeDefs = gql`
   type Message {
     id: ID!
@@ -76,6 +82,7 @@ export const typeDefs = gql`
   type Mutation {
     createMessage(input: MessageInput!): Message
     createRoom(input: RoomInput!): Room
+    deleteRoom(roomId: ID!): Boolean
   }
 `;
 

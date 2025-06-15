@@ -3,7 +3,7 @@
 "use client";
 
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_MESSAGES } from "@/lib/graphql/queries";
+import { GET_MESSAGES } from "@/lib/graphql/typeDefs";
 import { CREATE_MESSAGE } from "@/lib/graphql/mutations";
 import { useChat } from "@/context/ChatContext";
 import { useState, useRef, useEffect } from "react";

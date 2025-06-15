@@ -12,3 +12,9 @@ export const CREATE_MESSAGE = gql`
     }
   }
 `;
+
+export const DELETE_ROOM = gql`
+  mutation DeleteRoom($roomId: ID!) {
+    deleteRoom(roomId: $roomId)
+  }
+`;

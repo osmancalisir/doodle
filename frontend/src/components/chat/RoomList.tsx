@@ -4,7 +4,8 @@
 
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_ROOMS, CREATE_ROOM } from "@/lib/graphql/typeDefs";
+import { CREATE_ROOM, GET_ROOMS } from "@/lib/graphql/typeDefs";
+import { DELETE_ROOM } from "@/lib/graphql/mutations";
 import { useChat } from "@/context/ChatContext";
 import { useState, useEffect } from "react";
 import {
@@ -27,6 +28,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import GroupIcon from "@mui/icons-material/Group";
+import DeleteRoomDialog from "./DeleteRoomDialog";
 
 export default function RoomList() {
   const { currentUser } = useChat();
@@ -34,9 +36,13 @@ export default function RoomList() {
   const [createRoom] = useMutation(CREATE_ROOM, {
     onCompleted: () => refetch(),
   });
+  const [deleteRoom] = useMutation(DELETE_ROOM);
   const [newRoomName, setNewRoomName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -50,9 +56,59 @@ export default function RoomList() {
             name: newRoomName.trim(),
           },
         },
+        update: (cache, { data: mutationData }) => {
+          const existingRooms = cache.readQuery<{ rooms: any[] }>({
+            query: GET_ROOMS,
+          });
+
+          if (existingRooms && mutationData?.createRoom) {
+            cache.writeQuery({
+              query: GET_ROOMS,
+              data: {
+                rooms: [mutationData.createRoom, ...existingRooms.rooms],
+              },
+            });
+          }
+        },
       });
       setNewRoomName("");
       setIsDialogOpen(false);
+    }
+  };
+
+  const handleDeleteClick = (room: any) => {
+    setRoomToDelete(room);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!roomToDelete) return;
+
+    setDeleting(true);
+    try {
+      await deleteRoom({
+        variables: { roomId: roomToDelete.id },
+        update: (cache) => {
+          const existingRooms = cache.readQuery<{ rooms: any[] }>({
+            query: GET_ROOMS,
+          });
+
+          if (existingRooms) {
+            cache.writeQuery({
+              query: GET_ROOMS,
+              data: {
+                rooms: existingRooms.rooms.filter((room) => room.id !== roomToDelete.id),
+              },
+            });
+          }
+        },
+      });
+      setDeleteDialogOpen(false);
+    } catch (error) {
+      console.error("Error deleting room:", error);
+    } finally {
+      setDeleting(false);
+      setRoomToDelete(null);
     }
   };
 
@@ -95,7 +151,16 @@ export default function RoomList() {
                 primary={room.name}
                 secondary={`Created: ${new Date(room.createdAt).toLocaleDateString()}`}
               />
-              <IconButton edge="end" aria-label="delete">
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDeleteClick(room);
+                }}
+                sx={{ color: "error.main" }}
+              >
                 <DeleteIcon />
               </IconButton>
             </ListItem>
@@ -135,6 +200,14 @@ export default function RoomList() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <DeleteRoomDialog
+        open={deleteDialogOpen}
+        roomName={roomToDelete?.name || ""}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        loading={deleting}
+      />
     </Box>
   );
 }

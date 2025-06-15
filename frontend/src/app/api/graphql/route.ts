@@ -38,6 +38,7 @@ const typeDefs = gql`
   type Mutation {
     createMessage(input: MessageInput!): Message
     createRoom(input: RoomInput!): Room
+    deleteRoom(roomId: ID!): Boolean
   }
 `;
 
@@ -143,6 +144,27 @@ const resolvers = {
         throw new Error(`Failed to create room: ${err.response?.data?.error || err.message}`);
       }
     },
+    deleteRoom: async (_: any, { roomId }: { roomId: string }) => {
+      console.log(`[GraphQL] Deleting room: ${roomId}`);
+      try {
+        const response = await axios.delete(`${process.env.BACKEND_URL}/api/v1/rooms/${roomId}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.CHAT_TOKEN}`,
+          },
+        });
+
+        if (response.status === 204) {
+          return true;
+        }
+        return false;
+      } catch (err: any) {
+        console.error("Room deletion error:", err.message);
+        if (err.response) {
+          console.error("Backend response:", err.response.data);
+        }
+        throw new Error(`Failed to delete room: ${err.response?.data?.error || err.message}`);
+      }
+    },
   },
 };
 
@@ -171,6 +193,9 @@ const graphqlHandler = async (req: NextRequest) => {
     return response;
   } catch (err) {
     console.error("GraphQL handler error:", err);
+    if (err instanceof Error) {
+      console.error("Error stack:", err.stack);
+    }
     return new Response(
       JSON.stringify({
         error: "Internal Server Error",
