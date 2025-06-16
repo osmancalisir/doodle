@@ -1,6 +1,5 @@
 // frontend/src/components/chat/MessageItem.tsx
 
-import { useChat } from "@/context/ChatContext";
 import { Avatar, Box, Typography } from "@mui/material";
 import { format } from "date-fns";
 
@@ -11,11 +10,12 @@ interface MessageItemProps {
     message: string;
     createdAt: string;
   };
+  currentUser?: string;
 }
 
-export default function MessageItem({ message }: MessageItemProps) {
-  const { currentUser } = useChat();
+export default function MessageItem({ message, currentUser }: MessageItemProps) {
   const isCurrentUser = message.author === currentUser;
+  const isTempMessage = message.id.startsWith("temp-");
 
   return (
     <Box
@@ -23,6 +23,8 @@ export default function MessageItem({ message }: MessageItemProps) {
       sx={{
         maxWidth: "85%",
         alignSelf: isCurrentUser ? "flex-end" : "flex-start",
+        padding: "4px 12px",
+        opacity: isTempMessage ? 0.7 : 1,
       }}
     >
       {!isCurrentUser && (
@@ -44,8 +46,8 @@ export default function MessageItem({ message }: MessageItemProps) {
         sx={{
           borderRadius: "18px",
           padding: "12px 16px",
-          backgroundColor: isCurrentUser ? "#3f51b5" : "#f3f4f6",
-          color: isCurrentUser ? "white" : "text.primary",
+          backgroundColor: isCurrentUser ? "#4CAF50" : "#3f51b5",
+          color: "white",
           borderBottomRightRadius: isCurrentUser ? "4px" : "18px",
           borderBottomLeftRadius: isCurrentUser ? "18px" : "4px",
           position: "relative",
@@ -57,7 +59,7 @@ export default function MessageItem({ message }: MessageItemProps) {
             variant="subtitle2"
             className="font-bold"
             sx={{
-              color: "text.primary",
+              color: "rgba(255,255,255,0.9)",
               mb: 0.5,
             }}
           >
@@ -79,11 +81,11 @@ export default function MessageItem({ message }: MessageItemProps) {
             display: "block",
             mt: 0.5,
             textAlign: "right",
-            color: isCurrentUser ? "rgba(255,255,255,0.7)" : "text.secondary",
+            color: "rgba(255,255,255,0.7)",
             fontSize: "0.7rem",
           }}
         >
-          {format(new Date(message.createdAt), "HH:mm")}
+          {isTempMessage ? "Sending..." : format(new Date(message.createdAt), "HH:mm")}
         </Typography>
       </Box>
     </Box>

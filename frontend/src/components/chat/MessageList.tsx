@@ -10,6 +10,7 @@ interface MessageListProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
+  currentUser?: string;
 }
 
 export default function MessageList({
@@ -17,6 +18,7 @@ export default function MessageList({
   onLoadMore = () => {},
   hasMore = false,
   loadingMore = false,
+  currentUser = "",
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,24 +30,9 @@ export default function MessageList({
     <Box
       className="flex flex-col"
       sx={{
-        height: "100%",
-        overflowY: "auto",
+        minHeight: "100%",
         padding: "16px 12px",
         background: "#f9fafb",
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-track": {
-          backgroundColor: "transparent",
-          borderRadius: "4px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#c5c7d0",
-          borderRadius: "4px",
-          "&:hover": {
-            backgroundColor: "#a8abb4",
-          },
-        },
       }}
     >
       {hasMore && (
@@ -118,7 +105,7 @@ export default function MessageList({
       )}
 
       {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+        <MessageItem key={message.id} message={message} currentUser={currentUser} />
       ))}
 
       <div ref={messagesEndRef} />

@@ -48,8 +48,7 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
               <Box sx={{ display: "flex" }}>
                 {pathname.startsWith("/chat") && <RoomList />}
 
-                <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - 280px)` } }}>
-                  <Box sx={{ height: "64px" }} />
+                <Box component="main" sx={{ flexGrow: 1, width: { sm: `calc(100% - 280px)` } }}>
                   {children}
                 </Box>
               </Box>
