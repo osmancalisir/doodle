@@ -1,6 +1,6 @@
 // frontend/src/components/chat/MessageList.tsx
 
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import MessageItem from "./MessageItem";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Message } from "@/lib/types/message";
@@ -20,12 +20,6 @@ export default function MessageList({
   loadingMore = false,
   currentUser = "",
 }: MessageListProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   return (
     <Box
       className="flex flex-col"
@@ -107,8 +101,6 @@ export default function MessageList({
       {messages.map((message) => (
         <MessageItem key={message.id} message={message} currentUser={currentUser} />
       ))}
-
-      <div ref={messagesEndRef} />
     </Box>
   );
 }

@@ -30,6 +30,7 @@ import DeleteRoomDialog from "./DeleteRoomDialog";
 import { useChat } from "@/context/ChatContext";
 
 export default function RoomList() {
+  const { state, dispatch } = useChat();
   const { data } = useQuery(GET_ROOMS);
   const [createRoom] = useMutation(CREATE_ROOM);
   const [deleteRoom] = useMutation(DELETE_ROOM);
@@ -40,7 +41,6 @@ export default function RoomList() {
   const [roomToDelete, setRoomToDelete] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { currentUser, setCurrentUser } = useChat();
 
   useEffect(() => {
     setIsMounted(true);
@@ -111,7 +111,7 @@ export default function RoomList() {
   };
 
   const filteredRooms =
-    data?.rooms?.filter((room: { name: string }) => room.name.toLowerCase().includes(searchQuery.toLowerCase())) || [];
+    data?.rooms?.filter((room: any) => room.name.toLowerCase().includes(searchQuery.toLowerCase())) || [];
 
   if (!isMounted) {
     return (
@@ -148,13 +148,14 @@ export default function RoomList() {
               bgcolor: "primary.main",
               fontSize: "0.95rem",
               flexShrink: 0,
+              cursor: "pointer",
             }}
             onClick={() => {
-              const newName = prompt("Enter your name", currentUser);
-              if (newName) setCurrentUser(newName);
+              const newName = prompt("Enter your name", state.currentUser);
+              if (newName) dispatch({ type: "SET_USER", payload: newName });
             }}
           >
-            {currentUser.charAt(0)}
+            {state.currentUser.charAt(0)}
           </Avatar>
         </Box>
 
@@ -178,6 +179,7 @@ export default function RoomList() {
               href={`/chat/${room.id}`}
               className="hover:bg-gray-100 cursor-pointer border-b border-gray-100"
               sx={{ py: 1.5 }}
+              onClick={() => dispatch({ type: "SET_ACTIVE_ROOM", payload: room.id })}
             >
               <ListItemAvatar>
                 <Avatar sx={{ bgcolor: "primary.light", width: 36, height: 36 }}>
@@ -191,6 +193,7 @@ export default function RoomList() {
                 secondaryTypographyProps={{ variant: "caption" }}
                 sx={{ my: 0 }}
               />
+
               <IconButton
                 edge="end"
                 aria-label="delete"

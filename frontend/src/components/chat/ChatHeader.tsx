@@ -4,15 +4,14 @@ import React from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
+import { useChat } from "@/context/ChatContext";
 
-interface ChatHeaderProps {
-  roomName?: string;
-}
-
-export default function ChatHeader({ roomName }: ChatHeaderProps) {
+export default function ChatHeader() {
   const router = useRouter();
+  const { dispatch } = useChat();
 
   const handleBackClick = () => {
+    dispatch({ type: "SET_ACTIVE_ROOM", payload: null });
     router.push("/chat");
   };
 
@@ -27,11 +26,9 @@ export default function ChatHeader({ roomName }: ChatHeaderProps) {
         <IconButton onClick={handleBackClick} sx={{ mr: 1 }}>
           <ArrowBackIcon />
         </IconButton>
-        {roomName && (
-          <Typography variant="h6" className="font-bold">
-            {roomName}
-          </Typography>
-        )}
+        <Typography variant="h6" className="font-bold">
+          Chat Room
+        </Typography>
       </Box>
     </Box>
   );

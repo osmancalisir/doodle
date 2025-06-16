@@ -6,7 +6,7 @@ import { useQuery, useMutation } from "@apollo/client";
 import { GET_MESSAGES, CREATE_MESSAGE } from "@/lib/graphql/typeDefs";
 import { useChat } from "@/context/ChatContext";
 import { useState, useRef, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import MessageList from "@/components/chat/MessageList";
 import MessageInput from "@/components/chat/MessageInput";
 import ChatHeader from "@/components/chat/ChatHeader";
@@ -17,15 +17,23 @@ const sortMessages = (messages: any[]) => {
 };
 
 export default function ChatPage() {
+  const router = useRouter();
   const params = useParams();
-  const { currentUser } = useChat();
+  const { state, dispatch } = useChat();
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const roomId = Array.isArray(params.roomId) ? params.roomId[0] : params.roomId;
   const isValidRoomId = typeof roomId === "string" && roomId.length > 0;
+
+  useEffect(() => {
+    if (isValidRoomId) {
+      dispatch({ type: "SET_ACTIVE_ROOM", payload: roomId });
+    } else {
+      router.push("/chat");
+    }
+  }, [roomId, isValidRoomId, dispatch, router]);
 
   const { loading, error, data } = useQuery(GET_MESSAGES, {
     variables: { roomId, limit: 50 },
@@ -47,18 +55,24 @@ export default function ChatPage() {
         __typename: "Message",
         id: `optimistic-${Date.now()}`,
         message: newMessage.trim(),
-        author: currentUser,
+        author: state.currentUser,
         createdAt: new Date().toISOString(),
       },
     },
     update: (cache, { data: mutationData }) => {
       if (mutationData?.createMessage) {
-        cache.updateQuery({ query: GET_MESSAGES, variables: { roomId, limit: 50 } }, (existingData) => {
-          if (!existingData) return;
-          return {
-            messages: [...existingData.messages, mutationData.createMessage],
-          };
-        });
+        cache.updateQuery(
+          {
+            query: GET_MESSAGES,
+            variables: { roomId, limit: 50 },
+          },
+          (existingData) => {
+            if (!existingData) return;
+            return {
+              messages: [...existingData.messages, mutationData.createMessage],
+            };
+          }
+        );
       }
     },
   });
@@ -69,7 +83,7 @@ export default function ChatPage() {
       return;
     }
 
-    if (newMessage.trim() && currentUser) {
+    if (newMessage.trim() && state.currentUser) {
       setSendError(null);
       setNewMessage("");
 
@@ -78,7 +92,7 @@ export default function ChatPage() {
           variables: {
             input: {
               message: newMessage.trim(),
-              author: currentUser,
+              author: state.currentUser,
               roomId,
             },
           },
@@ -153,10 +167,8 @@ export default function ChatPage() {
           hasMore={false}
           loadingMore={false}
           onLoadMore={() => {}}
-          currentUser={currentUser}
+          currentUser={state.currentUser}
         />
-
-        <div ref={messagesEndRef} />
       </Box>
 
       <MessageInput value={newMessage} onChange={setNewMessage} onSend={handleSend} disabled={sending || loading} />
