@@ -4,8 +4,7 @@
 
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client";
-import { CREATE_ROOM, GET_ROOMS } from "@/lib/graphql/typeDefs";
-import { DELETE_ROOM } from "@/lib/graphql/mutations";
+import { CREATE_ROOM, GET_ROOMS, DELETE_ROOM } from "@/lib/graphql/typeDefs";
 import { useState, useEffect } from "react";
 import {
   Box,
