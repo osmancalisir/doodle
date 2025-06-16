@@ -16,8 +16,8 @@ RESTful API for a chat application with token-based authentication.
 
 ## Development Workflow
 # 1. Clone repository
-git clone git@github.com:osmancalisir/doodle.git
-cd doodle/backend
+- git clone git@github.com:osmancalisir/doodle.git
+- cd doodle/backend
 
 # 2. Install dependencies
 yarn install
