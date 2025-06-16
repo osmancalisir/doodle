@@ -121,3 +121,5 @@ INSERT INTO messages (message, author) VALUES
 3. **Migration issues**:
    - Verify migration file exists in `db/migrations`
    - Check file permissions: `chmod +x db/init.sh`
+
+### Please create a ".env" file in both the backend and frontend folders, and copy the contents from the corresponding ".env.example" file into each one.
